@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  FOUNDRY_PROFILE: ci
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Show Forge version
+        run: forge --version
+
+      - name: Build contracts
+        run: forge build --sizes
+
+      - name: Run tests
+        run: forge test -vvv
+
+      - name: Run fuzz tests
+        run: forge test --match-path "test/*.fuzz.t.sol" --fuzz-runs 5000
+
+      - name: Run invariant tests
+        run: forge test --match-path "test/*.invariant.t.sol"
+
+  lint:
+    name: Lint & Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Check formatting
+        run: forge fmt --check
+
+  gas:
+    name: Gas Snapshot
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Generate gas snapshot
+        run: forge snapshot
+
+      - name: Check gas snapshot
+        run: forge snapshot --check --tolerance 5
+        continue-on-error: true
+
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Generate coverage report
+        run: forge coverage --report summary
