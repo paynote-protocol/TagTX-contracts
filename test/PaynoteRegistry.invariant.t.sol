@@ -45,30 +45,19 @@ contract PaynoteRegistryInvariantTest is Test {
         (address[] memory authors, bytes32[] memory txHashes) = handler.getAttachedNotes();
 
         for (uint256 i = 0; i < authors.length; i++) {
-            assertTrue(
-                registry.hasNote(authors[i], txHashes[i]),
-                "Note should exist permanently"
-            );
+            assertTrue(registry.hasNote(authors[i], txHashes[i]), "Note should exist permanently");
         }
     }
 
     /// @notice Invariant: Total notes attached equals handler's note count
     function invariant_noteCountConsistency() public view {
         (address[] memory authors,) = handler.getAttachedNotes();
-        assertEq(
-            handler.getNoteCount(),
-            authors.length,
-            "Note count should match array length"
-        );
+        assertEq(handler.getNoteCount(), authors.length, "Note count should match array length");
     }
 
     /// @notice Invariant: Fee is always the value set by owner
     function invariant_feeMatchesLastSet() public view {
-        assertEq(
-            registry.fee(),
-            handler.getLastSetFee(),
-            "Fee should match last set value"
-        );
+        assertEq(registry.fee(), handler.getLastSetFee(), "Fee should match last set value");
     }
 
     /// @notice Invariant: Only owner can modify fee
@@ -76,11 +65,7 @@ contract PaynoteRegistryInvariantTest is Test {
         // If ownership was transferred and accepted, check new owner
         // Otherwise, original owner should still be owner
         address expectedOwner = handler.getCurrentExpectedOwner();
-        assertEq(
-            registry.owner(),
-            expectedOwner,
-            "Owner should match expected"
-        );
+        assertEq(registry.owner(), expectedOwner, "Owner should match expected");
     }
 }
 
@@ -113,7 +98,10 @@ contract PaynoteRegistryHandler is Test {
                               CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-    constructor(PaynoteRegistry _registry, address _owner) {
+    constructor(
+        PaynoteRegistry _registry,
+        address _owner
+    ) {
         registry = _registry;
         owner = _owner;
         _lastSetFee = _registry.fee();
@@ -156,7 +144,9 @@ contract PaynoteRegistryHandler is Test {
     }
 
     /// @notice Simulate owner setting fee
-    function setFee(uint256 newFee) external {
+    function setFee(
+        uint256 newFee
+    ) external {
         vm.prank(owner);
         try registry.setFee(newFee) {
             _lastSetFee = newFee;
@@ -169,8 +159,9 @@ contract PaynoteRegistryHandler is Test {
     function withdraw() external {
         vm.prank(owner);
         try registry.withdraw() {
-            // Success
-        } catch {
+        // Success
+        }
+            catch {
             // Failed
         }
     }
@@ -199,7 +190,9 @@ contract PaynoteRegistryHandler is Test {
                            HELPER FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
-    function _boundAddress(uint256 seed) internal pure returns (address) {
+    function _boundAddress(
+        uint256 seed
+    ) internal pure returns (address) {
         // Generate a valid non-zero address from seed
         return address(uint160(bound(seed, 1, type(uint160).max)));
     }

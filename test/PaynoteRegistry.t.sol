@@ -78,11 +78,7 @@ contract PaynoteRegistryTest is Test {
 
     function test_attachNote_success() public {
         vm.prank(user);
-        registry.attachNote{value: INITIAL_FEE}(
-            TARGET_TX_HASH,
-            REFERENCE_HASH,
-            CATEGORY_INVOICE
-        );
+        registry.attachNote{value: INITIAL_FEE}(TARGET_TX_HASH, REFERENCE_HASH, CATEGORY_INVOICE);
 
         assertTrue(registry.hasNote(user, TARGET_TX_HASH));
     }
@@ -91,28 +87,14 @@ contract PaynoteRegistryTest is Test {
         vm.prank(user);
 
         vm.expectEmit(true, true, true, true);
-        emit NoteAttached(
-            user,
-            TARGET_TX_HASH,
-            REFERENCE_HASH,
-            CATEGORY_INVOICE,
-            block.timestamp
-        );
+        emit NoteAttached(user, TARGET_TX_HASH, REFERENCE_HASH, CATEGORY_INVOICE, block.timestamp);
 
-        registry.attachNote{value: INITIAL_FEE}(
-            TARGET_TX_HASH,
-            REFERENCE_HASH,
-            CATEGORY_INVOICE
-        );
+        registry.attachNote{value: INITIAL_FEE}(TARGET_TX_HASH, REFERENCE_HASH, CATEGORY_INVOICE);
     }
 
     function test_attachNote_acceptsExactFee() public {
         vm.prank(user);
-        registry.attachNote{value: INITIAL_FEE}(
-            TARGET_TX_HASH,
-            REFERENCE_HASH,
-            CATEGORY_INVOICE
-        );
+        registry.attachNote{value: INITIAL_FEE}(TARGET_TX_HASH, REFERENCE_HASH, CATEGORY_INVOICE);
 
         assertTrue(registry.hasNote(user, TARGET_TX_HASH));
     }
@@ -120,9 +102,7 @@ contract PaynoteRegistryTest is Test {
     function test_attachNote_acceptsExcessFee() public {
         vm.prank(user);
         registry.attachNote{value: INITIAL_FEE * 2}(
-            TARGET_TX_HASH,
-            REFERENCE_HASH,
-            CATEGORY_INVOICE
+            TARGET_TX_HASH, REFERENCE_HASH, CATEGORY_INVOICE
         );
 
         assertTrue(registry.hasNote(user, TARGET_TX_HASH));
@@ -143,18 +123,12 @@ contract PaynoteRegistryTest is Test {
     function test_attachNote_multipleSendersForSameTx() public {
         // User 1 attaches note
         vm.prank(user);
-        registry.attachNote{value: INITIAL_FEE}(
-            TARGET_TX_HASH,
-            REFERENCE_HASH,
-            CATEGORY_INVOICE
-        );
+        registry.attachNote{value: INITIAL_FEE}(TARGET_TX_HASH, REFERENCE_HASH, CATEGORY_INVOICE);
 
         // User 2 can also attach note to the same tx
         vm.prank(user2);
         registry.attachNote{value: INITIAL_FEE}(
-            TARGET_TX_HASH,
-            keccak256("different_reference"),
-            CATEGORY_PAYROLL
+            TARGET_TX_HASH, keccak256("different_reference"), CATEGORY_PAYROLL
         );
 
         assertTrue(registry.hasNote(user, TARGET_TX_HASH));
@@ -167,17 +141,9 @@ contract PaynoteRegistryTest is Test {
 
         vm.startPrank(user);
 
-        registry.attachNote{value: INITIAL_FEE}(
-            txHash1,
-            REFERENCE_HASH,
-            CATEGORY_INVOICE
-        );
+        registry.attachNote{value: INITIAL_FEE}(txHash1, REFERENCE_HASH, CATEGORY_INVOICE);
 
-        registry.attachNote{value: INITIAL_FEE}(
-            txHash2,
-            REFERENCE_HASH,
-            CATEGORY_INVOICE
-        );
+        registry.attachNote{value: INITIAL_FEE}(txHash2, REFERENCE_HASH, CATEGORY_INVOICE);
 
         vm.stopPrank();
 
@@ -193,56 +159,36 @@ contract PaynoteRegistryTest is Test {
         vm.prank(user);
         vm.expectRevert(IPaynoteRegistry.InsufficientFee.selector);
         registry.attachNote{value: INITIAL_FEE - 1}(
-            TARGET_TX_HASH,
-            REFERENCE_HASH,
-            CATEGORY_INVOICE
+            TARGET_TX_HASH, REFERENCE_HASH, CATEGORY_INVOICE
         );
     }
 
     function test_attachNote_revertsOnZeroFee() public {
         vm.prank(user);
         vm.expectRevert(IPaynoteRegistry.InsufficientFee.selector);
-        registry.attachNote{value: 0}(
-            TARGET_TX_HASH,
-            REFERENCE_HASH,
-            CATEGORY_INVOICE
-        );
+        registry.attachNote{value: 0}(TARGET_TX_HASH, REFERENCE_HASH, CATEGORY_INVOICE);
     }
 
     function test_attachNote_revertsOnZeroTargetTxHash() public {
         vm.prank(user);
         vm.expectRevert(IPaynoteRegistry.InvalidTargetTxHash.selector);
-        registry.attachNote{value: INITIAL_FEE}(
-            bytes32(0),
-            REFERENCE_HASH,
-            CATEGORY_INVOICE
-        );
+        registry.attachNote{value: INITIAL_FEE}(bytes32(0), REFERENCE_HASH, CATEGORY_INVOICE);
     }
 
     function test_attachNote_revertsOnZeroReferenceHash() public {
         vm.prank(user);
         vm.expectRevert(IPaynoteRegistry.InvalidReferenceHash.selector);
-        registry.attachNote{value: INITIAL_FEE}(
-            TARGET_TX_HASH,
-            bytes32(0),
-            CATEGORY_INVOICE
-        );
+        registry.attachNote{value: INITIAL_FEE}(TARGET_TX_HASH, bytes32(0), CATEGORY_INVOICE);
     }
 
     function test_attachNote_revertsOnDuplicate() public {
         vm.startPrank(user);
 
-        registry.attachNote{value: INITIAL_FEE}(
-            TARGET_TX_HASH,
-            REFERENCE_HASH,
-            CATEGORY_INVOICE
-        );
+        registry.attachNote{value: INITIAL_FEE}(TARGET_TX_HASH, REFERENCE_HASH, CATEGORY_INVOICE);
 
         vm.expectRevert(IPaynoteRegistry.NoteAlreadyExists.selector);
         registry.attachNote{value: INITIAL_FEE}(
-            TARGET_TX_HASH,
-            keccak256("different_reference"),
-            CATEGORY_PAYROLL
+            TARGET_TX_HASH, keccak256("different_reference"), CATEGORY_PAYROLL
         );
 
         vm.stopPrank();
@@ -258,22 +204,14 @@ contract PaynoteRegistryTest is Test {
 
     function test_hasNote_returnsTrueAfterAttach() public {
         vm.prank(user);
-        registry.attachNote{value: INITIAL_FEE}(
-            TARGET_TX_HASH,
-            REFERENCE_HASH,
-            CATEGORY_INVOICE
-        );
+        registry.attachNote{value: INITIAL_FEE}(TARGET_TX_HASH, REFERENCE_HASH, CATEGORY_INVOICE);
 
         assertTrue(registry.hasNote(user, TARGET_TX_HASH));
     }
 
     function test_hasNote_isolatesUsers() public {
         vm.prank(user);
-        registry.attachNote{value: INITIAL_FEE}(
-            TARGET_TX_HASH,
-            REFERENCE_HASH,
-            CATEGORY_INVOICE
-        );
+        registry.attachNote{value: INITIAL_FEE}(TARGET_TX_HASH, REFERENCE_HASH, CATEGORY_INVOICE);
 
         assertTrue(registry.hasNote(user, TARGET_TX_HASH));
         assertFalse(registry.hasNote(user2, TARGET_TX_HASH));
@@ -310,20 +248,14 @@ contract PaynoteRegistryTest is Test {
 
         // User can now attach note for free
         vm.prank(user);
-        registry.attachNote{value: 0}(
-            TARGET_TX_HASH,
-            REFERENCE_HASH,
-            CATEGORY_INVOICE
-        );
+        registry.attachNote{value: 0}(TARGET_TX_HASH, REFERENCE_HASH, CATEGORY_INVOICE);
 
         assertTrue(registry.hasNote(user, TARGET_TX_HASH));
     }
 
     function test_setFee_revertsForNonOwner() public {
         vm.prank(user);
-        vm.expectRevert(
-            abi.encodeWithSignature("OwnableUnauthorizedAccount(address)", user)
-        );
+        vm.expectRevert(abi.encodeWithSignature("OwnableUnauthorizedAccount(address)", user));
         registry.setFee(0.001 ether);
     }
 
@@ -334,16 +266,8 @@ contract PaynoteRegistryTest is Test {
     function test_withdraw_ownerCanWithdrawAll() public {
         // User attaches multiple notes
         vm.startPrank(user);
-        registry.attachNote{value: INITIAL_FEE}(
-            keccak256("tx1"),
-            REFERENCE_HASH,
-            CATEGORY_INVOICE
-        );
-        registry.attachNote{value: INITIAL_FEE}(
-            keccak256("tx2"),
-            REFERENCE_HASH,
-            CATEGORY_INVOICE
-        );
+        registry.attachNote{value: INITIAL_FEE}(keccak256("tx1"), REFERENCE_HASH, CATEGORY_INVOICE);
+        registry.attachNote{value: INITIAL_FEE}(keccak256("tx2"), REFERENCE_HASH, CATEGORY_INVOICE);
         vm.stopPrank();
 
         uint256 contractBalance = address(registry).balance;
@@ -359,11 +283,7 @@ contract PaynoteRegistryTest is Test {
     function test_withdrawAmount_ownerCanWithdrawPartial() public {
         // User attaches note
         vm.prank(user);
-        registry.attachNote{value: INITIAL_FEE}(
-            TARGET_TX_HASH,
-            REFERENCE_HASH,
-            CATEGORY_INVOICE
-        );
+        registry.attachNote{value: INITIAL_FEE}(TARGET_TX_HASH, REFERENCE_HASH, CATEGORY_INVOICE);
 
         uint256 withdrawAmount = INITIAL_FEE / 2;
         uint256 ownerBalanceBefore = owner.balance;
@@ -377,31 +297,19 @@ contract PaynoteRegistryTest is Test {
 
     function test_withdraw_revertsForNonOwner() public {
         vm.prank(user);
-        registry.attachNote{value: INITIAL_FEE}(
-            TARGET_TX_HASH,
-            REFERENCE_HASH,
-            CATEGORY_INVOICE
-        );
+        registry.attachNote{value: INITIAL_FEE}(TARGET_TX_HASH, REFERENCE_HASH, CATEGORY_INVOICE);
 
         vm.prank(user);
-        vm.expectRevert(
-            abi.encodeWithSignature("OwnableUnauthorizedAccount(address)", user)
-        );
+        vm.expectRevert(abi.encodeWithSignature("OwnableUnauthorizedAccount(address)", user));
         registry.withdraw();
     }
 
     function test_withdrawAmount_revertsForNonOwner() public {
         vm.prank(user);
-        registry.attachNote{value: INITIAL_FEE}(
-            TARGET_TX_HASH,
-            REFERENCE_HASH,
-            CATEGORY_INVOICE
-        );
+        registry.attachNote{value: INITIAL_FEE}(TARGET_TX_HASH, REFERENCE_HASH, CATEGORY_INVOICE);
 
         vm.prank(user);
-        vm.expectRevert(
-            abi.encodeWithSignature("OwnableUnauthorizedAccount(address)", user)
-        );
+        vm.expectRevert(abi.encodeWithSignature("OwnableUnauthorizedAccount(address)", user));
         registry.withdraw(INITIAL_FEE);
     }
 
@@ -428,9 +336,7 @@ contract PaynoteRegistryTest is Test {
         assertEq(registry.pendingOwner(), address(0));
     }
 
-    function test_ownershipTransfer_pendingOwnerCannotActUntilAccepted()
-        public
-    {
+    function test_ownershipTransfer_pendingOwnerCannotActUntilAccepted() public {
         address newOwner = makeAddr("newOwner");
 
         vm.prank(owner);
@@ -438,12 +344,7 @@ contract PaynoteRegistryTest is Test {
 
         // Pending owner cannot set fee yet
         vm.prank(newOwner);
-        vm.expectRevert(
-            abi.encodeWithSignature(
-                "OwnableUnauthorizedAccount(address)",
-                newOwner
-            )
-        );
+        vm.expectRevert(abi.encodeWithSignature("OwnableUnauthorizedAccount(address)", newOwner));
         registry.setFee(0.001 ether);
     }
 
@@ -454,11 +355,7 @@ contract PaynoteRegistryTest is Test {
     function test_gas_attachNote() public {
         vm.prank(user);
         uint256 gasBefore = gasleft();
-        registry.attachNote{value: INITIAL_FEE}(
-            TARGET_TX_HASH,
-            REFERENCE_HASH,
-            CATEGORY_INVOICE
-        );
+        registry.attachNote{value: INITIAL_FEE}(TARGET_TX_HASH, REFERENCE_HASH, CATEGORY_INVOICE);
         uint256 gasUsed = gasBefore - gasleft();
 
         console.log("Gas used for attachNote:", gasUsed);
@@ -468,11 +365,7 @@ contract PaynoteRegistryTest is Test {
 
     function test_gas_hasNote() public {
         vm.prank(user);
-        registry.attachNote{value: INITIAL_FEE}(
-            TARGET_TX_HASH,
-            REFERENCE_HASH,
-            CATEGORY_INVOICE
-        );
+        registry.attachNote{value: INITIAL_FEE}(TARGET_TX_HASH, REFERENCE_HASH, CATEGORY_INVOICE);
 
         uint256 gasBefore = gasleft();
         registry.hasNote(user, TARGET_TX_HASH);
@@ -480,6 +373,6 @@ contract PaynoteRegistryTest is Test {
 
         console.log("Gas used for hasNote:", gasUsed);
         // Sanity check: should be very cheap
-        assertLt(gasUsed, 5_000);
+        assertLt(gasUsed, 5000);
     }
 }

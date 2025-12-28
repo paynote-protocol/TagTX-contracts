@@ -71,7 +71,10 @@ interface IPaynoteRegistry {
     /// @param author The address that attached the note
     /// @param targetTxHash The transaction hash to check
     /// @return True if a note exists, false otherwise
-    function hasNote(address author, bytes32 targetTxHash) external view returns (bool);
+    function hasNote(
+        address author,
+        bytes32 targetTxHash
+    ) external view returns (bool);
 
     /// @notice Get the protocol version
     /// @return The version string

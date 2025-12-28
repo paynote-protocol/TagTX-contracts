@@ -36,7 +36,10 @@ contract PaynoteRegistry is IPaynoteRegistry, Ownable2Step {
     /// @notice Deploy a new PaynoteRegistry
     /// @param initialFee The initial fee to attach a note (in wei)
     /// @param initialOwner The initial owner of the contract (receives fees, can update fee)
-    constructor(uint256 initialFee, address initialOwner) Ownable(initialOwner) {
+    constructor(
+        uint256 initialFee,
+        address initialOwner
+    ) Ownable(initialOwner) {
         fee = initialFee;
         emit FeeUpdated(0, initialFee);
     }
@@ -65,17 +68,14 @@ contract PaynoteRegistry is IPaynoteRegistry, Ownable2Step {
         _notes[msg.sender][targetTxHash] = true;
 
         // Emit the canonical event for off-chain indexers
-        emit NoteAttached(
-            msg.sender,
-            targetTxHash,
-            referenceHash,
-            category,
-            block.timestamp
-        );
+        emit NoteAttached(msg.sender, targetTxHash, referenceHash, category, block.timestamp);
     }
 
     /// @inheritdoc IPaynoteRegistry
-    function hasNote(address author, bytes32 targetTxHash) external view returns (bool) {
+    function hasNote(
+        address author,
+        bytes32 targetTxHash
+    ) external view returns (bool) {
         return _notes[author][targetTxHash];
     }
 
@@ -86,7 +86,9 @@ contract PaynoteRegistry is IPaynoteRegistry, Ownable2Step {
     /// @notice Update the fee required to attach a note
     /// @dev Only callable by contract owner
     /// @param newFee The new fee in wei
-    function setFee(uint256 newFee) external onlyOwner {
+    function setFee(
+        uint256 newFee
+    ) external onlyOwner {
         uint256 oldFee = fee;
         fee = newFee;
         emit FeeUpdated(oldFee, newFee);
@@ -103,7 +105,9 @@ contract PaynoteRegistry is IPaynoteRegistry, Ownable2Step {
     /// @notice Withdraw a specific amount of fees to the owner
     /// @dev Only callable by contract owner
     /// @param amount The amount in wei to withdraw
-    function withdraw(uint256 amount) external onlyOwner {
+    function withdraw(
+        uint256 amount
+    ) external onlyOwner {
         (bool success,) = owner().call{value: amount}("");
         if (!success) revert WithdrawFailed();
     }

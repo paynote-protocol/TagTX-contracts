@@ -23,11 +23,7 @@ contract DeployPaynoteRegistry is Script {
     /// @notice Get deployment configuration from environment variables
     /// @return fee The initial fee for attaching notes
     /// @return ownerAddress The initial owner of the registry
-    function getConfig()
-        internal
-        view
-        returns (uint256 fee, address ownerAddress)
-    {
+    function getConfig() internal view returns (uint256 fee, address ownerAddress) {
         // Fee can be overridden via environment variable (in wei)
         fee = vm.envOr("INITIAL_FEE", DEFAULT_FEE);
 
