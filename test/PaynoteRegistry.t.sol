@@ -9,6 +9,21 @@ import {IPaynoteRegistry} from "../src/interfaces/IPaynoteRegistry.sol";
 /// @notice Comprehensive test coverage for the PaynoteRegistry contract
 contract PaynoteRegistryTest is Test {
     /*//////////////////////////////////////////////////////////////
+                                 EVENTS
+    //////////////////////////////////////////////////////////////*/
+
+    /// @dev Mirror of IPaynoteRegistry.NoteAttached for emit testing
+    event NoteAttached(
+        address indexed author,
+        bytes32 indexed targetTxHash,
+        bytes32 referenceHash,
+        bytes32 indexed category,
+        uint256 timestamp
+    );
+
+    /// @dev Mirror of IPaynoteRegistry.FeeUpdated for emit testing
+    event FeeUpdated(uint256 oldFee, uint256 newFee);
+    /*//////////////////////////////////////////////////////////////
                                  STATE
     //////////////////////////////////////////////////////////////*/
 
@@ -53,7 +68,7 @@ contract PaynoteRegistryTest is Test {
 
     function test_constructor_emitsFeeUpdated() public {
         vm.expectEmit(true, true, true, true);
-        emit IPaynoteRegistry.FeeUpdated(0, INITIAL_FEE);
+        emit FeeUpdated(0, INITIAL_FEE);
         new PaynoteRegistry(INITIAL_FEE, owner);
     }
 
@@ -76,7 +91,7 @@ contract PaynoteRegistryTest is Test {
         vm.prank(user);
 
         vm.expectEmit(true, true, true, true);
-        emit IPaynoteRegistry.NoteAttached(
+        emit NoteAttached(
             user,
             TARGET_TX_HASH,
             REFERENCE_HASH,
@@ -281,7 +296,7 @@ contract PaynoteRegistryTest is Test {
         uint256 newFee = 0.001 ether;
 
         vm.expectEmit(true, true, true, true);
-        emit IPaynoteRegistry.FeeUpdated(INITIAL_FEE, newFee);
+        emit FeeUpdated(INITIAL_FEE, newFee);
 
         vm.prank(owner);
         registry.setFee(newFee);
@@ -306,7 +321,9 @@ contract PaynoteRegistryTest is Test {
 
     function test_setFee_revertsForNonOwner() public {
         vm.prank(user);
-        vm.expectRevert(abi.encodeWithSignature("OwnableUnauthorizedAccount(address)", user));
+        vm.expectRevert(
+            abi.encodeWithSignature("OwnableUnauthorizedAccount(address)", user)
+        );
         registry.setFee(0.001 ether);
     }
 
@@ -317,8 +334,16 @@ contract PaynoteRegistryTest is Test {
     function test_withdraw_ownerCanWithdrawAll() public {
         // User attaches multiple notes
         vm.startPrank(user);
-        registry.attachNote{value: INITIAL_FEE}(keccak256("tx1"), REFERENCE_HASH, CATEGORY_INVOICE);
-        registry.attachNote{value: INITIAL_FEE}(keccak256("tx2"), REFERENCE_HASH, CATEGORY_INVOICE);
+        registry.attachNote{value: INITIAL_FEE}(
+            keccak256("tx1"),
+            REFERENCE_HASH,
+            CATEGORY_INVOICE
+        );
+        registry.attachNote{value: INITIAL_FEE}(
+            keccak256("tx2"),
+            REFERENCE_HASH,
+            CATEGORY_INVOICE
+        );
         vm.stopPrank();
 
         uint256 contractBalance = address(registry).balance;
@@ -334,7 +359,11 @@ contract PaynoteRegistryTest is Test {
     function test_withdrawAmount_ownerCanWithdrawPartial() public {
         // User attaches note
         vm.prank(user);
-        registry.attachNote{value: INITIAL_FEE}(TARGET_TX_HASH, REFERENCE_HASH, CATEGORY_INVOICE);
+        registry.attachNote{value: INITIAL_FEE}(
+            TARGET_TX_HASH,
+            REFERENCE_HASH,
+            CATEGORY_INVOICE
+        );
 
         uint256 withdrawAmount = INITIAL_FEE / 2;
         uint256 ownerBalanceBefore = owner.balance;
@@ -348,19 +377,31 @@ contract PaynoteRegistryTest is Test {
 
     function test_withdraw_revertsForNonOwner() public {
         vm.prank(user);
-        registry.attachNote{value: INITIAL_FEE}(TARGET_TX_HASH, REFERENCE_HASH, CATEGORY_INVOICE);
+        registry.attachNote{value: INITIAL_FEE}(
+            TARGET_TX_HASH,
+            REFERENCE_HASH,
+            CATEGORY_INVOICE
+        );
 
         vm.prank(user);
-        vm.expectRevert(abi.encodeWithSignature("OwnableUnauthorizedAccount(address)", user));
+        vm.expectRevert(
+            abi.encodeWithSignature("OwnableUnauthorizedAccount(address)", user)
+        );
         registry.withdraw();
     }
 
     function test_withdrawAmount_revertsForNonOwner() public {
         vm.prank(user);
-        registry.attachNote{value: INITIAL_FEE}(TARGET_TX_HASH, REFERENCE_HASH, CATEGORY_INVOICE);
+        registry.attachNote{value: INITIAL_FEE}(
+            TARGET_TX_HASH,
+            REFERENCE_HASH,
+            CATEGORY_INVOICE
+        );
 
         vm.prank(user);
-        vm.expectRevert(abi.encodeWithSignature("OwnableUnauthorizedAccount(address)", user));
+        vm.expectRevert(
+            abi.encodeWithSignature("OwnableUnauthorizedAccount(address)", user)
+        );
         registry.withdraw(INITIAL_FEE);
     }
 
@@ -387,7 +428,9 @@ contract PaynoteRegistryTest is Test {
         assertEq(registry.pendingOwner(), address(0));
     }
 
-    function test_ownershipTransfer_pendingOwnerCannotActUntilAccepted() public {
+    function test_ownershipTransfer_pendingOwnerCannotActUntilAccepted()
+        public
+    {
         address newOwner = makeAddr("newOwner");
 
         vm.prank(owner);
@@ -395,7 +438,12 @@ contract PaynoteRegistryTest is Test {
 
         // Pending owner cannot set fee yet
         vm.prank(newOwner);
-        vm.expectRevert(abi.encodeWithSignature("OwnableUnauthorizedAccount(address)", newOwner));
+        vm.expectRevert(
+            abi.encodeWithSignature(
+                "OwnableUnauthorizedAccount(address)",
+                newOwner
+            )
+        );
         registry.setFee(0.001 ether);
     }
 
