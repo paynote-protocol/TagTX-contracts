@@ -157,6 +157,23 @@ forge coverage
 
 ## Deployment
 
+### Network Selection
+
+The deployment scripts automatically detect the network based on the RPC URL's chain ID:
+
+- **Ethereum Mainnet** (1)
+- **Sepolia** (11155111)
+- **Base Mainnet** (8453)
+- **Base Sepolia** (84532)
+- **Polygon** (137)
+- **Polygon Mumbai** (80001)
+- **Arbitrum** (42161)
+- **Arbitrum Sepolia** (421614)
+- **Optimism** (10)
+- **Optimism Sepolia** (11155420)
+
+Network-specific configurations (like fees) are automatically applied. Testnets use lower default fees.
+
 ### Configuration
 
 1. Copy `.env.example` to `.env`
@@ -183,6 +200,18 @@ forge script script/DeployPaynoteRegistry.s.sol \
   --rpc-url $BASE_MAINNET_RPC_URL \
   --broadcast \
   --verify
+```
+
+### Testing with Fork URLs
+
+You can test deployment scripts against forked networks:
+
+```bash
+# Test on Sepolia fork
+forge test --fork-url $SEPOLIA_RPC_URL --match-test test_forkNetworkDetection
+
+# Test deployment script on fork (dry run)
+forge script script/DeployPaynoteRegistry.s.sol --fork-url $SEPOLIA_RPC_URL
 ```
 
 ## Security

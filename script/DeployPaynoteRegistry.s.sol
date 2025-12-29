@@ -3,12 +3,13 @@ pragma solidity ^0.8.20;
 
 import {Script, console} from "forge-std/Script.sol";
 import {PaynoteRegistry} from "../src/PaynoteRegistry.sol";
+import {NetworkSelector} from "./NetworkSelector.s.sol";
 
 /// @title DeployPaynoteRegistry
 /// @notice Deployment script for PaynoteRegistry to Base mainnet and testnet
 /// @dev Usage:
 ///   forge script script/DeployPaynoteRegistry.s.sol --rpc-url $BASE_SEPOLIA_RPC_URL --broadcast --verify
-contract DeployPaynoteRegistry is Script {
+contract DeployPaynoteRegistry is Script, NetworkSelector {
     /*//////////////////////////////////////////////////////////////
                               CONSTANTS
     //////////////////////////////////////////////////////////////*/
@@ -20,12 +21,15 @@ contract DeployPaynoteRegistry is Script {
                             CONFIGURATION
     //////////////////////////////////////////////////////////////*/
 
-    /// @notice Get deployment configuration from environment variables
+    /// @notice Get deployment configuration from environment variables and network
     /// @return fee The initial fee for attaching notes
     /// @return ownerAddress The initial owner of the registry
     function getConfig() internal view returns (uint256 fee, address ownerAddress) {
+        // Get network-specific default fee
+        (uint256 networkFee, ) = getNetworkConfig();
+
         // Fee can be overridden via environment variable (in wei)
-        fee = vm.envOr("INITIAL_FEE", DEFAULT_FEE);
+        fee = vm.envOr("INITIAL_FEE", networkFee);
 
         // Owner address is required
         ownerAddress = vm.envAddress("OWNER_ADDRESS");
@@ -48,7 +52,7 @@ contract DeployPaynoteRegistry is Script {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
 
         console.log("=== PaynoteRegistry Deployment ===");
-        console.log("Chain ID:", block.chainid);
+        logNetworkInfo();
         console.log("Owner:", ownerAddress);
         console.log("Initial fee:", fee, "wei");
         console.log("Initial fee:", fee / 1e14, "* 0.0001 ETH");
