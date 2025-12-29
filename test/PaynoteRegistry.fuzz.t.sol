@@ -47,18 +47,15 @@ contract PaynoteRegistryFuzzTest is Test {
         vm.deal(sender, 1 ether);
 
         vm.prank(sender);
-        registry.attachNote{value: INITIAL_FEE}(
-            targetTxHash,
-            referenceHash,
-            category,
-            ipfsCID
-        );
+        registry.attachNote{value: INITIAL_FEE}(targetTxHash, referenceHash, category, ipfsCID);
 
         assertTrue(registry.hasNote(sender, targetTxHash));
     }
 
     /// @notice Fuzz test: attachNote with random fee amounts above minimum
-    function testFuzz_attachNote_excessFee(uint256 extraFee) public {
+    function testFuzz_attachNote_excessFee(
+        uint256 extraFee
+    ) public {
         extraFee = bound(extraFee, 0, 10 ether);
         uint256 totalFee = INITIAL_FEE + extraFee;
 
@@ -70,10 +67,7 @@ contract PaynoteRegistryFuzzTest is Test {
 
         vm.prank(sender);
         registry.attachNote{value: totalFee}(
-            targetTxHash,
-            referenceHash,
-            keccak256("category"),
-            "QmTestCID"
+            targetTxHash, referenceHash, keccak256("category"), "QmTestCID"
         );
 
         assertTrue(registry.hasNote(sender, targetTxHash));
@@ -96,10 +90,7 @@ contract PaynoteRegistryFuzzTest is Test {
         // Only sender1 attaches a note
         vm.prank(sender1);
         registry.attachNote{value: INITIAL_FEE}(
-            targetTxHash,
-            keccak256("reference"),
-            keccak256("category"),
-            "QmTestCID"
+            targetTxHash, keccak256("reference"), keccak256("category"), "QmTestCID"
         );
 
         // sender1 has the note, sender2 does not
@@ -108,7 +99,9 @@ contract PaynoteRegistryFuzzTest is Test {
     }
 
     /// @notice Fuzz test: setFee with random values
-    function testFuzz_setFee(uint256 newFee) public {
+    function testFuzz_setFee(
+        uint256 newFee
+    ) public {
         vm.prank(owner);
         registry.setFee(newFee);
 
@@ -116,7 +109,9 @@ contract PaynoteRegistryFuzzTest is Test {
     }
 
     /// @notice Fuzz test: attachNote reverts with insufficient fee
-    function testFuzz_attachNote_insufficientFee(uint256 paidFee) public {
+    function testFuzz_attachNote_insufficientFee(
+        uint256 paidFee
+    ) public {
         paidFee = bound(paidFee, 0, INITIAL_FEE - 1);
 
         address sender = makeAddr("sender");
@@ -125,10 +120,7 @@ contract PaynoteRegistryFuzzTest is Test {
         vm.prank(sender);
         vm.expectRevert(IPaynoteRegistry.InsufficientFee.selector);
         registry.attachNote{value: paidFee}(
-            keccak256("target"),
-            keccak256("reference"),
-            keccak256("category"),
-            "QmTestCID"
+            keccak256("target"), keccak256("reference"), keccak256("category"), "QmTestCID"
         );
     }
 
@@ -168,7 +160,9 @@ contract PaynoteRegistryFuzzTest is Test {
     }
 
     /// @notice Fuzz test: withdraw works for any balance
-    function testFuzz_withdraw(uint256 numNotes) public {
+    function testFuzz_withdraw(
+        uint256 numNotes
+    ) public {
         numNotes = bound(numNotes, 1, 100);
 
         address sender = makeAddr("sender");
@@ -204,10 +198,7 @@ contract PaynoteRegistryFuzzTest is Test {
     ) public {
         vm.assume(initialOwner != address(0));
 
-        PaynoteRegistry newRegistry = new PaynoteRegistry(
-            initialFee,
-            initialOwner
-        );
+        PaynoteRegistry newRegistry = new PaynoteRegistry(initialFee, initialOwner);
 
         assertEq(newRegistry.fee(), initialFee);
         assertEq(newRegistry.owner(), initialOwner);
