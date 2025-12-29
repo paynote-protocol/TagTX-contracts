@@ -28,7 +28,8 @@ contract PaynoteRegistry is IPaynoteRegistry, Ownable2Step {
 
     /// @notice Tracks attached notes by (author, targetTxHash)
     /// @dev Mapping to Note struct for storing full note data
-    mapping(address author => mapping(bytes32 targetTxHash => Note)) private _notes;
+    mapping(address author => mapping(bytes32 targetTxHash => Note))
+        private _notes;
 
     /*//////////////////////////////////////////////////////////////
                               CONSTANTS
@@ -71,7 +72,8 @@ contract PaynoteRegistry is IPaynoteRegistry, Ownable2Step {
         if (referenceHash == bytes32(0)) revert InvalidReferenceHash();
 
         // Check for duplicate (one note per sender per transaction)
-        if (_notes[msg.sender][targetTxHash].timestamp != 0) revert NoteAlreadyExists();
+        if (_notes[msg.sender][targetTxHash].timestamp != 0)
+            revert NoteAlreadyExists();
 
         // Record the note
         _notes[msg.sender][targetTxHash] = Note({
@@ -82,7 +84,14 @@ contract PaynoteRegistry is IPaynoteRegistry, Ownable2Step {
         });
 
         // Emit the canonical event for off-chain indexers
-        emit NoteAttached(msg.sender, targetTxHash, referenceHash, category, ipfsCID, block.timestamp);
+        emit NoteAttached(
+            msg.sender,
+            targetTxHash,
+            referenceHash,
+            category,
+            ipfsCID,
+            block.timestamp
+        );
     }
 
     /// @inheritdoc IPaynoteRegistry
@@ -97,14 +106,23 @@ contract PaynoteRegistry is IPaynoteRegistry, Ownable2Step {
     function getNote(
         address author,
         bytes32 targetTxHash
-    ) external view returns (
-        bytes32 referenceHash,
-        bytes32 category,
-        string memory ipfsCID,
-        uint256 timestamp
-    ) {
+    )
+        external
+        view
+        returns (
+            bytes32 referenceHash,
+            bytes32 category,
+            string memory ipfsCID,
+            uint256 timestamp
+        )
+    {
         Note memory note = _notes[author][targetTxHash];
-        return (note.referenceHash, note.category, note.ipfsCID, note.timestamp);
+        return (
+            note.referenceHash,
+            note.category,
+            note.ipfsCID,
+            note.timestamp
+        );
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -114,9 +132,7 @@ contract PaynoteRegistry is IPaynoteRegistry, Ownable2Step {
     /// @notice Update the fee required to attach a note
     /// @dev Only callable by contract owner
     /// @param newFee The new fee in wei
-    function setFee(
-        uint256 newFee
-    ) external onlyOwner {
+    function setFee(uint256 newFee) external onlyOwner {
         uint256 oldFee = fee;
         fee = newFee;
         emit FeeUpdated(oldFee, newFee);
@@ -126,17 +142,15 @@ contract PaynoteRegistry is IPaynoteRegistry, Ownable2Step {
     /// @dev Only callable by contract owner
     function withdraw() external onlyOwner {
         uint256 balance = address(this).balance;
-        (bool success,) = owner().call{value: balance}("");
+        (bool success, ) = owner().call{value: balance}("");
         if (!success) revert WithdrawFailed();
     }
 
     /// @notice Withdraw a specific amount of fees to the owner
     /// @dev Only callable by contract owner
     /// @param amount The amount in wei to withdraw
-    function withdraw(
-        uint256 amount
-    ) external onlyOwner {
-        (bool success,) = owner().call{value: amount}("");
+    function withdraw(uint256 amount) external onlyOwner {
+        (bool success, ) = owner().call{value: amount}("");
         if (!success) revert WithdrawFailed();
     }
 }

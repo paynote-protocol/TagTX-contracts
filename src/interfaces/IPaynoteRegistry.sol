@@ -90,12 +90,15 @@ interface IPaynoteRegistry {
     function getNote(
         address author,
         bytes32 targetTxHash
-    ) external view returns (
-        bytes32 referenceHash,
-        bytes32 category,
-        string memory ipfsCID,
-        uint256 timestamp
-    );
+    )
+        external
+        view
+        returns (
+            bytes32 referenceHash,
+            bytes32 category,
+            string memory ipfsCID,
+            uint256 timestamp
+        );
 
     /// @notice Get the protocol version
     /// @return The version string
