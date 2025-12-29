@@ -14,8 +14,8 @@ contract PaynoteRegistryInvariantTest is Test {
     PaynoteRegistry public registry;
     PaynoteRegistryHandler public handler;
 
-    address public owner = makeAddr("owner");
-    uint256 public constant INITIAL_FEE = 0.0001 ether;
+    address public owner = address(0x1234);
+    uint256 public constant INITIAL_FEE = 1 ether;
 
     /*//////////////////////////////////////////////////////////////
                                  SETUP

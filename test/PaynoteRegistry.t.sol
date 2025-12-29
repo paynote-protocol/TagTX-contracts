@@ -30,11 +30,11 @@ contract PaynoteRegistryTest is Test {
 
     PaynoteRegistry public registry;
 
-    address public owner = makeAddr("owner");
-    address public user = makeAddr("user");
-    address public user2 = makeAddr("user2");
+    address public owner = address(0x1234);
+    address public user = address(0x5678);
+    address public user2 = address(0x9ABC);
 
-    uint256 public constant INITIAL_FEE = 0.0001 ether;
+    uint256 public constant INITIAL_FEE = 1 ether;
 
     bytes32 public constant TARGET_TX_HASH = keccak256("target_tx_hash");
     bytes32 public constant REFERENCE_HASH = keccak256("reference_payload");
