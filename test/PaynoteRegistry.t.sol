@@ -301,6 +301,37 @@ contract PaynoteRegistryTest is Test {
     }
 
     /*//////////////////////////////////////////////////////////////
+                          GET NOTE TESTS
+    //////////////////////////////////////////////////////////////*/
+
+    function test_getNote_returnsCorrectData() public {
+        vm.prank(user);
+        registry.attachNote{value: INITIAL_FEE}(
+            TARGET_TX_HASH,
+            REFERENCE_HASH,
+            CATEGORY_INVOICE,
+            IPFS_CID
+        );
+
+        (
+            bytes32 returnedReferenceHash,
+            bytes32 returnedCategory,
+            string memory returnedIpfsCID,
+            uint256 returnedTimestamp
+        ) = registry.getNote(user, TARGET_TX_HASH);
+
+        assertEq(returnedReferenceHash, REFERENCE_HASH);
+        assertEq(returnedCategory, CATEGORY_INVOICE);
+        assertEq(returnedIpfsCID, IPFS_CID);
+        assertEq(returnedTimestamp, block.timestamp);
+    }
+
+    function test_getNote_revertsForNonExistentNote() public {
+        vm.expectRevert(); // Should revert when accessing non-existent note
+        registry.getNote(user, TARGET_TX_HASH);
+    }
+
+    /*//////////////////////////////////////////////////////////////
                           SET FEE TESTS
     //////////////////////////////////////////////////////////////*/
 
