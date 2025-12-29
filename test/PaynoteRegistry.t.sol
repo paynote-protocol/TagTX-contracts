@@ -326,9 +326,18 @@ contract PaynoteRegistryTest is Test {
         assertEq(returnedTimestamp, block.timestamp);
     }
 
-    function test_getNote_revertsForNonExistentNote() public {
-        vm.expectRevert(); // Should revert when accessing non-existent note
-        registry.getNote(user, TARGET_TX_HASH);
+    function test_getNote_returnsDefaultForNonExistentNote() public {
+        (
+            bytes32 returnedReferenceHash,
+            bytes32 returnedCategory,
+            string memory returnedIpfsCID,
+            uint256 returnedTimestamp
+        ) = registry.getNote(user, TARGET_TX_HASH);
+
+        assertEq(returnedReferenceHash, bytes32(0));
+        assertEq(returnedCategory, bytes32(0));
+        assertEq(returnedIpfsCID, "");
+        assertEq(returnedTimestamp, 0);
     }
 
     /*//////////////////////////////////////////////////////////////
