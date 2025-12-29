@@ -35,17 +35,19 @@ contract PaynoteRegistryFuzzTest is Test {
         address sender,
         bytes32 targetTxHash,
         bytes32 referenceHash,
-        bytes32 category
+        bytes32 category,
+        string calldata ipfsCID
     ) public {
         // Bound inputs to valid values
         vm.assume(sender != address(0));
         vm.assume(targetTxHash != bytes32(0));
         vm.assume(referenceHash != bytes32(0));
+        vm.assume(bytes(ipfsCID).length > 0 && bytes(ipfsCID).length <= 100); // Reasonable IPFS CID length
 
         vm.deal(sender, 1 ether);
 
         vm.prank(sender);
-        registry.attachNote{value: INITIAL_FEE}(targetTxHash, referenceHash, category);
+        registry.attachNote{value: INITIAL_FEE}(targetTxHash, referenceHash, category, ipfsCID);
 
         assertTrue(registry.hasNote(sender, targetTxHash));
     }
@@ -64,7 +66,7 @@ contract PaynoteRegistryFuzzTest is Test {
         bytes32 referenceHash = keccak256("reference");
 
         vm.prank(sender);
-        registry.attachNote{value: totalFee}(targetTxHash, referenceHash, keccak256("category"));
+        registry.attachNote{value: totalFee}(targetTxHash, referenceHash, keccak256("category"), "QmTestCID");
 
         assertTrue(registry.hasNote(sender, targetTxHash));
         assertEq(address(registry).balance, totalFee);
@@ -86,7 +88,7 @@ contract PaynoteRegistryFuzzTest is Test {
         // Only sender1 attaches a note
         vm.prank(sender1);
         registry.attachNote{value: INITIAL_FEE}(
-            targetTxHash, keccak256("reference"), keccak256("category")
+            targetTxHash, keccak256("reference"), keccak256("category"), "QmTestCID"
         );
 
         // sender1 has the note, sender2 does not
@@ -116,7 +118,7 @@ contract PaynoteRegistryFuzzTest is Test {
         vm.prank(sender);
         vm.expectRevert(IPaynoteRegistry.InsufficientFee.selector);
         registry.attachNote{value: paidFee}(
-            keccak256("target"), keccak256("reference"), keccak256("category")
+            keccak256("target"), keccak256("reference"), keccak256("category"), "QmTestCID"
         );
     }
 
@@ -142,7 +144,8 @@ contract PaynoteRegistryFuzzTest is Test {
             registry.attachNote{value: INITIAL_FEE}(
                 targetTxHashes[i],
                 keccak256(abi.encodePacked("reference", i)),
-                keccak256("category")
+                keccak256("category"),
+                "QmTestCID"
             );
         }
 
@@ -168,7 +171,8 @@ contract PaynoteRegistryFuzzTest is Test {
             registry.attachNote{value: INITIAL_FEE}(
                 keccak256(abi.encodePacked("tx", i)),
                 keccak256(abi.encodePacked("ref", i)),
-                keccak256("category")
+                keccak256("category"),
+                "QmTestCID"
             );
         }
         vm.stopPrank();

@@ -15,12 +15,14 @@ interface IPaynoteRegistry {
     /// @param targetTxHash The hash of the transaction being referenced
     /// @param referenceHash Hash of the off-chain reference payload
     /// @param category Category identifier for the reference type
+    /// @param ipfsCID IPFS content identifier for the note content
     /// @param timestamp Block timestamp when the note was attached
     event NoteAttached(
         address indexed author,
         bytes32 indexed targetTxHash,
         bytes32 referenceHash,
         bytes32 indexed category,
+        string ipfsCID,
         uint256 timestamp
     );
 
@@ -57,10 +59,12 @@ interface IPaynoteRegistry {
     /// @param targetTxHash The transaction hash to attach a note to
     /// @param referenceHash Hash of the off-chain reference payload
     /// @param category Category identifier (e.g., keccak256("invoice"))
+    /// @param ipfsCID IPFS content identifier for the note content
     function attachNote(
         bytes32 targetTxHash,
         bytes32 referenceHash,
-        bytes32 category
+        bytes32 category,
+        string calldata ipfsCID
     ) external payable;
 
     /// @notice Get the current fee required to attach a note
@@ -75,6 +79,23 @@ interface IPaynoteRegistry {
         address author,
         bytes32 targetTxHash
     ) external view returns (bool);
+
+    /// @notice Get the details of a note attached by an author for a transaction
+    /// @param author The address that attached the note
+    /// @param targetTxHash The transaction hash to check
+    /// @return referenceHash Hash of the off-chain reference payload
+    /// @return category Category identifier for the reference type
+    /// @return ipfsCID IPFS content identifier for the note content
+    /// @return timestamp Block timestamp when the note was attached
+    function getNote(
+        address author,
+        bytes32 targetTxHash
+    ) external view returns (
+        bytes32 referenceHash,
+        bytes32 category,
+        string memory ipfsCID,
+        uint256 timestamp
+    );
 
     /// @notice Get the protocol version
     /// @return The version string

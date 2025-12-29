@@ -18,9 +18,17 @@ contract PaynoteRegistry is IPaynoteRegistry, Ownable2Step {
     /// @notice Fee required to attach a note (in wei)
     uint256 public fee;
 
-    /// @notice Tracks which (author, targetTxHash) pairs have notes attached
-    /// @dev Nested mapping for O(1) duplicate detection
-    mapping(address author => mapping(bytes32 targetTxHash => bool exists)) private _notes;
+    /// @notice Structure to store note details
+    struct Note {
+        bytes32 referenceHash;
+        bytes32 category;
+        string ipfsCID;
+        uint256 timestamp;
+    }
+
+    /// @notice Tracks attached notes by (author, targetTxHash)
+    /// @dev Mapping to Note struct for storing full note data
+    mapping(address author => mapping(bytes32 targetTxHash => Note)) private _notes;
 
     /*//////////////////////////////////////////////////////////////
                               CONSTANTS
@@ -52,7 +60,8 @@ contract PaynoteRegistry is IPaynoteRegistry, Ownable2Step {
     function attachNote(
         bytes32 targetTxHash,
         bytes32 referenceHash,
-        bytes32 category
+        bytes32 category,
+        string calldata ipfsCID
     ) external payable {
         // Validate fee payment
         if (msg.value < fee) revert InsufficientFee();
@@ -62,13 +71,18 @@ contract PaynoteRegistry is IPaynoteRegistry, Ownable2Step {
         if (referenceHash == bytes32(0)) revert InvalidReferenceHash();
 
         // Check for duplicate (one note per sender per transaction)
-        if (_notes[msg.sender][targetTxHash]) revert NoteAlreadyExists();
+        if (_notes[msg.sender][targetTxHash].timestamp != 0) revert NoteAlreadyExists();
 
         // Record the note
-        _notes[msg.sender][targetTxHash] = true;
+        _notes[msg.sender][targetTxHash] = Note({
+            referenceHash: referenceHash,
+            category: category,
+            ipfsCID: ipfsCID,
+            timestamp: block.timestamp
+        });
 
         // Emit the canonical event for off-chain indexers
-        emit NoteAttached(msg.sender, targetTxHash, referenceHash, category, block.timestamp);
+        emit NoteAttached(msg.sender, targetTxHash, referenceHash, category, ipfsCID, block.timestamp);
     }
 
     /// @inheritdoc IPaynoteRegistry
@@ -76,7 +90,21 @@ contract PaynoteRegistry is IPaynoteRegistry, Ownable2Step {
         address author,
         bytes32 targetTxHash
     ) external view returns (bool) {
-        return _notes[author][targetTxHash];
+        return _notes[author][targetTxHash].timestamp != 0;
+    }
+
+    /// @inheritdoc IPaynoteRegistry
+    function getNote(
+        address author,
+        bytes32 targetTxHash
+    ) external view returns (
+        bytes32 referenceHash,
+        bytes32 category,
+        string memory ipfsCID,
+        uint256 timestamp
+    ) {
+        Note memory note = _notes[author][targetTxHash];
+        return (note.referenceHash, note.category, note.ipfsCID, note.timestamp);
     }
 
     /*//////////////////////////////////////////////////////////////

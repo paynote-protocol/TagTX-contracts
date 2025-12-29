@@ -131,7 +131,7 @@ contract PaynoteRegistryHandler is Test {
         uint256 fee = registry.fee();
 
         vm.prank(sender);
-        try registry.attachNote{value: fee}(targetTxHash, referenceHash, category) {
+        try registry.attachNote{value: fee}(targetTxHash, referenceHash, category, "QmInvariantCID") {
             // Track successful note attachment
             _authors.push(sender);
             _txHashes.push(targetTxHash);
